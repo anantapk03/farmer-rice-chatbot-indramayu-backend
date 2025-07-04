@@ -1,0 +1,5 @@
+# Ignore model & environment
+app/model_state.pt
+venv/
+__pycache__/
+*.pyc
