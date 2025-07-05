@@ -8,21 +8,13 @@ nltk.download('punkt')
 # Setup device
 device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 
-# Load tokenizer
-tokenizer = AutoTokenizer.from_pretrained("gpt2")
-tokenizer.add_special_tokens({
-    "pad_token": "<pad>",
-    "bos_token": "<startofstring>",
-    "eos_token": "<endofstring>"
-})
-tokenizer.add_tokens(["<bot>:"])
+# Ganti dengan nama repo kamu di Hugging Face
+base_model = "anantapk03/gpt2-chatbot-indramayu-farmer-rice-10kdata"
 
-# Load model architecture
-model = AutoModelForCausalLM.from_pretrained("gpt2")
+# Load model dan tokenizer langsung dari Hugging Face
+tokenizer = AutoTokenizer.from_pretrained(base_model)
+model = AutoModelForCausalLM.from_pretrained(base_model)
 model.resize_token_embeddings(len(tokenizer))
-
-# Load trained weights
-model.load_state_dict(torch.load("app/model_state.pt", map_location=device))
 model.to(device)
 model.eval()
 
@@ -40,12 +32,11 @@ def generate_response(prompt: str, max_new_tokens: int = 150) -> str:
         )
 
     decoded = tokenizer.decode(output[0], skip_special_tokens=False)
+
+    # Ekstrak respons dari token khusus
     start_idx = decoded.find("<bot>:")
     if start_idx != -1:
-        response = decoded[start_idx + len("<bot>"):]
-        end_idx = response.find("<endofstring>")
-        if end_idx != -1:
-            response = response[:end_idx]
+        response = decoded[start_idx + len("<bot>"):].split("<endofstring>")[0]
         response = response.replace("<startofstring>", "").replace("<pad>", "").strip()
     else:
         response = "Maaf, saya tidak dapat memahami pertanyaan Anda."
