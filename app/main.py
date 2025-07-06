@@ -5,6 +5,7 @@ from app.inference import generate_response
 
 app = FastAPI()
 
+
 class ChatRequest(BaseModel):
     question: str
 
@@ -18,6 +19,12 @@ def custom_response(status_code: int, message: str, detail: dict | None):
             "detail": detail
         }
     )
+
+@app.get("/")
+def read_root():
+    return {"message": "API is running!"}
+
+
 
 # ✅ Endpoint utama
 @app.post("/chat")
